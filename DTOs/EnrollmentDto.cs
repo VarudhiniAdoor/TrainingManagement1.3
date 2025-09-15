@@ -7,5 +7,6 @@ public record EnrollmentDto(
     int BatchId,
     string BatchName,
     string Status,
-    string? ApprovedBy
+    string? ApprovedBy,
+    string? RejectReason = null  
 );

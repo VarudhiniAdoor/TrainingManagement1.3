@@ -147,7 +147,8 @@ public class BatchesController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
-                e.Manager != null ? e.Manager.Username : null
+                e.Manager != null ? e.Manager.Username : null,
+                e.RejectReason
             ))
             .ToListAsync();
 

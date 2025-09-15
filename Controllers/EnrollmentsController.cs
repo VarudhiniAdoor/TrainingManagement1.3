@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Tms.Api.Data;
 using Tms.Api.Dtos;
 using Tms.Api.Models;
+using TrainingManagement1.DTOs;
 
 namespace Tms.Api.Controllers;
 
@@ -78,19 +79,19 @@ public class EnrollmentsController : ControllerBase
 
     [HttpPost("{id:int}/reject")]
     [Authorize(Roles = "Manager")]
-    public async Task<IActionResult> Reject(int id)
+    public async Task<IActionResult> Reject(int id, [FromBody] RejectRequest request)
     {
         var e = await _db.Enrollment
             .Include(en => en.User)
             .FirstOrDefaultAsync(en => en.EnrollmentId == id);
 
         if (e == null) return NotFound();
-
         if (e.User.ManagerId != CurrentUserId)
             return Forbid("You are not this employee's manager.");
 
         e.Status = "Rejected";
         e.ManagerId = CurrentUserId;
+        e.RejectReason = request.Reason;
 
         await _db.SaveChangesAsync();
         return NoContent();
@@ -99,7 +100,9 @@ public class EnrollmentsController : ControllerBase
 
 
 
-[HttpGet("pending")]
+
+
+    [HttpGet("pending")]
     [Authorize(Roles = "Manager,Administrator")]
     public async Task<ActionResult<IEnumerable<EnrollmentDto>>> Pending()
     {
@@ -114,9 +117,10 @@ public class EnrollmentsController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
-                e.Manager != null ? e.Manager.Username : null
+                e.Manager != null ? e.Manager.Username : null,
+                e.RejectReason
             ))
-            .ToListAsync();
+.ToListAsync();
 
         return Ok(result);
     }
@@ -135,6 +139,7 @@ public class EnrollmentsController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
+                e.RejectReason,
                 e.Manager != null ? e.Manager.Username : null
             ))
             .ToListAsync();
@@ -156,7 +161,8 @@ public class EnrollmentsController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
-                e.Manager != null ? e.Manager.Username : null
+                e.Manager != null ? e.Manager.Username : null,
+                e.RejectReason
             ))
             .ToListAsync();
 
@@ -201,7 +207,8 @@ public class EnrollmentsController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
-                e.Manager != null ? e.Manager.Username : null
+                e.Manager != null ? e.Manager.Username : null,
+                e.RejectReason
             ))
             .ToListAsync();
 
@@ -222,7 +229,8 @@ public class EnrollmentsController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
-                e.Manager != null ? e.Manager.Username : null
+                e.Manager != null ? e.Manager.Username : null,
+                e.RejectReason
             ))
             .ToListAsync();
 
@@ -270,7 +278,8 @@ public class EnrollmentsController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
-                e.Manager != null ? e.Manager.Username : null
+                e.Manager != null ? e.Manager.Username : null,
+                e.RejectReason
             ))
             .ToListAsync();
 
@@ -292,7 +301,8 @@ public class EnrollmentsController : ControllerBase
                 e.Batch.BatchId,
                 e.Batch.BatchName,
                 e.Status!,
-                e.Manager != null ? e.Manager.Username : null
+                e.Manager != null ? e.Manager.Username : null,
+                e.RejectReason
             ))
             .ToListAsync();
 

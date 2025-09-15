@@ -29,8 +29,8 @@ public class UsersController : ControllerBase
         if (await _db.Users.AnyAsync(u => u.Username == dto.Username))
             return Conflict("Username already exists.");
 
-        if (role.RoleName == "Employee" && dto.ManagerId == null)
-            return BadRequest("Employee must be assigned to a Manager.");
+        //if (role.RoleName == "Employee" && dto.ManagerId == null)
+        //    return BadRequest("Employee must be assigned to a Manager.");
 
         var user = new User
         {
@@ -139,5 +139,27 @@ public class UsersController : ControllerBase
         if (e == null) return NotFound();
         return Ok(e);
     }
+
+    [HttpPut("{id:int}")]
+public async Task<IActionResult> UpdateUser(int id, [FromBody] CreateUserDto dto)
+{
+    var user = await _db.Users.FindAsync(id);
+    if (user == null) return NotFound();
+
+    var role = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == dto.RoleName);
+    if (role == null) return BadRequest("Invalid role.");
+
+    user.Username = dto.Username;
+    if (!string.IsNullOrWhiteSpace(dto.Password))
+        user.PasswordHash = _hasher.HashPassword(user, dto.Password);
+    user.Email = dto.Email;
+    user.FirstName = dto.FirstName;
+    user.LastName = dto.LastName;
+    user.RoleId = role.RoleId;
+    user.ManagerId = dto.RoleName == "Employee" ? dto.ManagerId : null;
+
+    await _db.SaveChangesAsync();
+    return Ok();
+}
 
 }
